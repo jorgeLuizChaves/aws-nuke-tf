@@ -1,0 +1,31 @@
+regions:
+  - TARGET_REGION # will be overridden during run time based on region parameter
+
+# resources that won't be delete
+account-blocklist:
+- 123456789012 #prod
+
+# optional: restrict nuking to these resources
+resource-types:
+  excludes: # exclude this as will be already handled when you include S3Bucket/DynamoDBTable. Else takes a lot of time and logs get filled up
+  - S3Object
+  - DynamoDBTableItem
+  targets:
+  - EC2Instance
+
+accounts:
+  ACCOUNT: # will be overridden during run time based on account param
+    filters:
+      IAMRole:
+      - "S3Access"
+      - "s3FullAccess"
+      IAMUser:
+      - "jorge.devops"
+      IAMUserPolicyAttachment:
+      - property: RoleName
+        value: "admin"
+      IAMUserAccessKey:
+      - property: UserName
+        value: "admin"
+      S3Bucket:
+      - "s3://aws-nuke-config001"
