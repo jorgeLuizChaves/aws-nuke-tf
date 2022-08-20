@@ -50,12 +50,12 @@ resource "aws_s3_bucket_policy" "nuke_bucket_policy" {
 
 resource "aws_s3_object" "nuke_config_update" {
   bucket = aws_s3_bucket.aws_nuke_config.id
-  source = "nuke_config_update.py"
+  source = "config/nuke_config_update.py"
   key    = "nuke_config_update.py"
 }
 
 resource "aws_s3_object" "nuke_generic_config" {
   bucket = aws_s3_bucket.aws_nuke_config.id
-  source = "nuke_generic_config.yaml"
+  source = "config/nuke_generic_config.yaml"
   key    = "nuke_generic_config.yaml"
 }
