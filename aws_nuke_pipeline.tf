@@ -142,7 +142,7 @@ resource "aws_codebuild_project" "aws_nuke_cleanser" {
   build_timeout          = 120
   concurrent_build_limit = 1
   description            = "Builds a container to run AWS-Nuke for all accounts within the specified account/regions"
-  encryption_key         = "arn:aws:kms:${var.region}:${local.account_di}:alias/aws/s3"
+  encryption_key         = "arn:aws:kms:${var.region}:${local.account_id}:alias/aws/s3"
   name                   = var.project_name
   project_visibility     = "PRIVATE"
   queued_timeout         = 480

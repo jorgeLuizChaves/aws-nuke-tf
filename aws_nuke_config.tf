@@ -5,7 +5,7 @@ resource "random_integer" "num" {
 
 # BUCKET
 resource "aws_s3_bucket" "aws_nuke_config" {
-  bucket = "${var.project_name}-${resource_integer.num}"
+  bucket = "${var.project_name}-${random_integer.num.result}"
 
   tags = {
     DoNotNuke = true
