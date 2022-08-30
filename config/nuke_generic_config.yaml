@@ -5,7 +5,7 @@ regions:
 account-blocklist:
 - 123456789012 #prod
 
-# optional: restrict nuking to these resources
+# optional: restrict nuking to these resources (here you cand define what will be destroyed or not)
 resource-types:
   excludes: # exclude this as will be already handled when you include S3Bucket/DynamoDBTable. Else takes a lot of time and logs get filled up
   - S3Object
@@ -15,7 +15,7 @@ resource-types:
 
 accounts:
   ACCOUNT: # will be overridden during run time based on account param
-    filters:
+    filters: # this filters help you to filter what resources you don't want to delete
       IAMRole:
       - "S3Access"
       - "s3FullAccess"
