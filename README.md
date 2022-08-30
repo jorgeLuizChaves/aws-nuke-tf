@@ -25,8 +25,11 @@ A solução foi implementada utilizando `IaC` (Infrastructure as Code) no caso t
 - `region`: região aonde será implantada a solução.
 - `aws_nuke_cron`: cronjob de execução do aws nuke.
 
-## Implantação
+## Arquivo de configuração
+O aws-nuke possui um arquivo estático que se encontra em `config/nuke_generic_config.yaml`, este arquivo permite que você faça configurações para definir quais recursos podem ser deletados, quais não podem ser deletados, filtro de contas que não podem ter recursos removidos. para maior compreensão das configurações do arquivo, visite o endereço https://github.com/rebuy-de/aws-nuke.
 
+
+## Implantação
 Para executar a implatanção é necessário que o usuário que será utilizado para realizar a implantação tenha permissões necessárias.
 
 ```bash
