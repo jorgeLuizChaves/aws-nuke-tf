@@ -24,28 +24,7 @@ resource "aws_s3_bucket_public_access_block" "example" {
 
 resource "aws_s3_bucket_policy" "nuke_bucket_policy" {
   bucket = aws_s3_bucket.aws_nuke_config.id
-  policy = <<POLICY
-    {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Sid": "ForceSSLOnlyAccess",
-                "Effect": "Deny",
-                "Principal": "*",
-                "Action": "s3:*",
-                "Resource": [
-                    "${aws_s3_bucket.aws_nuke_config.arn}",
-                    "${aws_s3_bucket.aws_nuke_config.arn}/*"
-                ],
-                "Condition": {
-                    "Bool": {
-                        "aws:SecureTransport": "false"
-                    }
-                }
-            }
-        ]
-    }
-  POLICY
+  policy = templatefile("files/templates/aws_s3_bucket_policy.nuke_bucket_policy.policy.json.tftpl", { resource_arn = aws_s3_bucket.aws_nuke_config.arn })
 }
 
 resource "aws_s3_object" "nuke_config_update" {

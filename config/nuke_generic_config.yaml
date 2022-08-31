@@ -16,13 +16,16 @@ resource-types:
 accounts:
   ACCOUNT: # will be overridden during run time based on account param
     filters: # this filters help you to filter what resources you don't want to delete
+      EC2Instance:
+      - property: "tag:DoNotNuke" #filter by tag
+        value: "yes"
       IAMRole:
       - "S3Access"
       - "s3FullAccess"
       IAMUser:
       - "jorge.devops"
       IAMUserPolicyAttachment:
-      - property: RoleName
+      - property: RoleName #filter by name
         value: "admin"
       IAMUserAccessKey:
       - property: UserName

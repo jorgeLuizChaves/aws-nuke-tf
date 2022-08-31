@@ -4,23 +4,10 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
 }
 
-
-
 resource "aws_iam_role_policy" "assume_nuke_policy" {
-  name = "AssumeNukePolicy"
-  role = aws_iam_role.nuke_code_build_project_role.id
-  policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action   = "sts:AssumeRole"
-          Effect   = "Allow"
-          Resource = aws_iam_role.nuke_auto_account_cleanser.arn
-        },
-      ]
-      Version = "2012-10-17"
-    }
-  )
+  name   = "AssumeNukePolicy"
+  role   = aws_iam_role.nuke_code_build_project_role.id
+  policy = templatefile("files/templates/aws_iam_role_policy.assume_nuke_policy.policy.json.tftpl", { resource_arn = aws_iam_role.nuke_auto_account_cleanser.arn })
 }
 
 resource "aws_iam_role_policy" "nuke_code_build_logs_policy" {

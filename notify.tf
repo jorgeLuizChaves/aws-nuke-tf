@@ -5,30 +5,16 @@ resource "aws_sns_topic" "aws_nuke_notify" {
   name                        = "${var.project_name}-teste"
 }
 
+resource "aws_sns_topic_subscription" "users_notified" {
+  for_each  = toset(var.emails_notification)
+  topic_arn = aws_sns_topic.aws_nuke_notify.arn
+  protocol  = "email"
+  endpoint  = each.key
+}
 
 
 resource "aws_iam_policy" "sns_policy_rule" {
   name        = "sns_policy"
   description = "SNS policy"
-  policy      = <<EOT
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-        "SNS:GetTopicAttributes",
-        "SNS:SetTopicAttributes",
-        "SNS:AddPermission",
-        "SNS:RemovePermission",
-        "SNS:DeleteTopic",
-        "SNS:Subscribe",
-        "SNS:ListSubscriptionsByTopic",
-        "SNS:Publish"
-      ],
-      "Effect": "Allow",
-      "Resource": "${aws_sns_topic.aws_nuke_notify.arn}"
-    }
-  ]
-}
-EOT
+  policy      = templatefile("files/templates/aws_iam_policy.sns_policy_rule.policy.json.tftpl", { resource_arn = aws_sns_topic.aws_nuke_notify.arn })
 }
