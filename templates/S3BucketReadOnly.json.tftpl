@@ -1,0 +1,16 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "s3:Get*",
+                "s3:List*"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "${bucket_arn}",
+                "${bucket_arn}/*"
+            ]
+        }
+    ],
+    "Version": "2012-10-17"
+}

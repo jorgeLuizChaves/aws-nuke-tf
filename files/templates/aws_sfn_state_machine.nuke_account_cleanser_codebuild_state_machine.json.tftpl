@@ -1,0 +1,114 @@
+{
+  "Comment": "AWS Nuke Account Cleanser for multi-region single account clean up using SFN Map state parallel invocation of CodeBuild project.",
+  "StartAt": "StartNukeCodeBuildForEachRegion",
+  "States": {
+    "Clean Output and Notify": {
+      "End": true,
+      "Parameters": {
+        "Message.$": "$.InputPayLoad",
+        "Subject": "State Machine for Nuke Account Cleanser succeeded",
+        "TopicArn": "${topic_arn}"
+      },
+      "Resource": "arn:aws:states:::sns:publish",
+      "Type": "Task"
+    },
+    "StartNukeCodeBuildForEachRegion": {
+      "ItemsPath": "$.InputPayLoad.region_list",
+      "Iterator": {
+        "StartAt": "Trigger Nuke CodeBuild Job",
+        "States": {
+          "Check Nuke CodeBuild Job Status": {
+            "Choices": [
+              {
+                "Next": "Nuke Success",
+                "StringEquals": "SUCCEEDED",
+                "Variable": "$.AccountCleanserRegionOutput.NukeBuildOutput.BuildStatus"
+              },
+              {
+                "Next": "Nuke Failed",
+                "StringEquals": "FAILED",
+                "Variable": "$.AccountCleanserRegionOutput.NukeBuildOutput.BuildStatus"
+              }
+            ],
+            "Default": "Nuke Failed",
+            "Type": "Choice"
+          },
+          "Nuke Failed": {
+            "Type": "Fail"
+          },
+          "Nuke Success": {
+            "Type": "Succeed"
+          },
+          "Trigger Nuke CodeBuild Job": {
+            "Catch": [
+              {
+                "ErrorEquals": [
+                  "States.TaskFailed"
+                ],
+                "Next": "Nuke Failed"
+              }
+            ],
+            "Next": "Check Nuke CodeBuild Job Status",
+            "Parameters": {
+              "EnvironmentVariablesOverride": [
+                {
+                  "Name": "NukeTargetRegion",
+                  "Type": "PLAINTEXT",
+                  "Value.$": "$.region_id"
+                },
+                {
+                  "Name": "AWS_NukeDryRun",
+                  "Type": "PLAINTEXT",
+                  "Value.$": "$.nuke_dry_run"
+                },
+                {
+                  "Name": "AWS_NukeVersion",
+                  "Type": "PLAINTEXT",
+                  "Value.$": "$.nuke_version"
+                },
+                {
+                  "Name": "NukeS3Bucket",
+                  "Type": "PLAINTEXT",
+                  "Value.$": "$.nuke_config_bucket"
+                },
+                {
+                  "Name": "Publish_TopicArn",
+                  "Type": "PLAINTEXT",
+                  "Value.$": "$.sns_notification_arn"
+                }
+              ],
+              "ProjectName": "${project_name}"
+            },
+            "Resource": "arn:aws:states:::codebuild:startBuild.sync",
+            "ResultPath": "$.AccountCleanserRegionOutput",
+            "ResultSelector": {
+              "NukeBuildOutput.$": "$.Build"
+            },
+            "Retry": [
+              {
+                "BackoffRate": 1,
+                "ErrorEquals": [
+                  "States.TaskFailed"
+                ],
+                "IntervalSeconds": 1,
+                "MaxAttempts": 1
+              }
+            ],
+            "Type": "Task"
+          }
+        }
+      },
+      "MaxConcurrency": 0,
+      "Next": "Clean Output and Notify",
+      "Parameters": {
+        "nuke_config_bucket.$": "$.InputPayLoad.nuke_config_bucket",
+        "nuke_dry_run.$": "$.InputPayLoad.nuke_dry_run",
+        "nuke_version.$": "$.InputPayLoad.nuke_version",
+        "region_id.$": "$$.Map.Item.Value",
+        "sns_notification_arn.$": "$.InputPayLoad.sns_notification_arn"
+      },
+      "ResultPath": null,
+      "Type": "Map"
+    }
+  }
+}

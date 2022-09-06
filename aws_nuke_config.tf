@@ -24,7 +24,10 @@ resource "aws_s3_bucket_public_access_block" "example" {
 
 resource "aws_s3_bucket_policy" "nuke_bucket_policy" {
   bucket = aws_s3_bucket.aws_nuke_config.id
-  policy = templatefile("files/templates/aws_s3_bucket_policy.nuke_bucket_policy.policy.json.tftpl", { resource_arn = aws_s3_bucket.aws_nuke_config.arn })
+  policy = templatefile("files/templates/aws_s3_bucket_policy.nuke_bucket_policy.policy.json.tftpl",
+    {
+      resource_arn = aws_s3_bucket.aws_nuke_config.arn
+  })
 }
 
 resource "aws_s3_object" "nuke_config_update" {

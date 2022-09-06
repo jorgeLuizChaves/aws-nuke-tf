@@ -14,109 +14,32 @@ resource "aws_iam_role_policy" "nuke_code_build_logs_policy" {
   name = "NukeCodeBuildLogsPolicy"
   role = aws_iam_role.nuke_code_build_project_role.id
 
-  policy = jsonencode(
+  policy = templatefile("templates/NukeCodeBuildLogsPolicy.json.tftpl",
     {
-      Statement = [
-        {
-          Action = [
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream",
-            "logs:PutLogEvents",
-            "logs:DescribeLogStreams",
-            "logs:FilterLogEvents",
-          ]
-          Effect = "Allow"
-          Resource = [
-            # maybe use data
-            "arn:aws:logs:${var.region}:${local.account_id}:log-group:${var.project_name}",
-            "arn:aws:logs:${var.region}:${local.account_id}:log-group:${var.project_name}:*",
-          ]
-        },
-      ]
-      Version = "2012-10-17"
+      region       = var.region,
+      account_id   = local.account_id,
+      project_name = var.project_name
     }
   )
 }
 
 resource "aws_iam_role_policy" "nuke_list_ou_accounts" {
-  name = "NukeListOUAccounts"
-  role = aws_iam_role.nuke_code_build_project_role.id
-
-  policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action   = "organizations:ListAccountsForParent"
-          Effect   = "Allow"
-          Resource = "*"
-        },
-      ]
-      Version = "2012-10-17"
-    }
-  )
+  name   = "NukeListOUAccounts"
+  role   = aws_iam_role.nuke_code_build_project_role.id
+  policy = file("files/NukeListOUAccounts.json")
 }
 
 resource "aws_iam_role_policy" "s3_bucket_read_only" {
   name = "S3BucketReadOnly"
   role = aws_iam_role.nuke_code_build_project_role.id
 
-  policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = [
-            "s3:Get*",
-            "s3:List*",
-          ]
-          Effect = "Allow"
-          Resource = [
-
-            "${aws_s3_bucket.aws_nuke_config.arn}",
-            "${aws_s3_bucket.aws_nuke_config.arn}/*",
-          ]
-        },
-      ]
-      Version = "2012-10-17"
-    }
-  )
-}
-
-resource "aws_iam_policy" "sns_publish_policy" {
-  name = "SNSPublishPolicy"
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : [
-            "sns:ListTagsForResource",
-            "sns:ListSubscriptionsByTopic",
-            "sns:GetTopicAttributes",
-            "sns:Publish",
-          ],
-          "Effect" : "Allow",
-          "Resource" : "${aws_sns_topic.aws_nuke_notify.arn}"
-        }
-      ]
-    }
-  )
+  policy = templatefile("templates/S3BucketReadOnly.json.tftpl", {
+      bucket_arn = aws_s3_bucket.aws_nuke_config.arn
+  })
 }
 
 resource "aws_iam_role" "nuke_code_build_project_role" {
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = "sts:AssumeRole"
-          Effect = "Allow"
-          Principal = {
-            Service = "codebuild.amazonaws.com"
-          }
-        },
-      ]
-      Version = "2012-10-17"
-    }
-  )
+  assume_role_policy = file("files/NukeCodeBuildProjectRole.json")
   name = "NukeCodeBuildProjectRole"
   path = "/"
 }
@@ -127,36 +50,15 @@ resource "aws_iam_role" "nuke_code_build_project_role" {
 resource "aws_iam_role_policy" "event_bridge_nuke_state_machine_execution_policy" {
   name = "EventBridgeNukeStateMachineExecutionPolicy"
   role = aws_iam_role.event_bridge_nuke_schedule.id
-  policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = "states:StartExecution"
-          Effect = "Allow"
-          # Resource = aws_sfn_state_machine.nuke_account_cleanser_codebuild_state_machine.arn
-          Resource = "arn:aws:states:${var.region}:${local.account_id}:stateMachine:nuke-account-cleanser-codebuild-state-machine"
-        },
-      ]
-      Version = "2012-10-17"
-    }
+  policy = templatefile("templates/EventBridgeNukeStateMachineExecutionPolicy.json.tftpl", {
+    region = var.region,
+    account_id = local.account_id
+  }
   )
 }
 
 resource "aws_iam_role" "event_bridge_nuke_schedule" {
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = "sts:AssumeRole"
-          Effect = "Allow"
-          Principal = {
-            Service = "events.amazonaws.com"
-          }
-        },
-      ]
-      Version = "2012-10-17"
-    }
-  )
+  assume_role_policy = file("files/EventBridgeNukeSchedule.json")
   force_detach_policies = false
   managed_policy_arns   = []
   max_session_duration  = 3600
@@ -169,83 +71,18 @@ resource "aws_iam_role" "event_bridge_nuke_schedule" {
 resource "aws_iam_role_policy" "nuke_account_cleanser_codebuild_state_machine_policy" {
   name = "nuke-account-cleanser-codebuild-state-machine-policy"
   role = aws_iam_role.nuke_account_cleanser_codebuild_state_machine_role.id
-  policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = [
-            "codebuild:StartBuild",
-            "codebuild:StartBuild",
-            "codebuild:StopBuild",
-            "codebuild:StartBuildBatch",
-            "codebuild:StopBuildBatch",
-            "codebuild:RetryBuild",
-            "codebuild:RetryBuildBatch",
-            "codebuild:BatchGet*",
-            "codebuild:GetResourcePolicy",
-            "codebuild:DescribeTestCases",
-            "codebuild:DescribeCodeCoverages",
-            "codebuild:List*",
-          ]
-          Effect = "Allow"
-          Resource = [
-            aws_codebuild_project.aws_nuke_cleanser.arn
-          ]
-        },
-        {
-          Action = [
-            "events:PutTargets",
-            "events:PutRule",
-            "events:DescribeRule",
-          ]
-          Effect = "Allow"
-          # Resource = aws_cloudwatch_event_rule.event_bridge_nuke_schedule.arn
-          Resource = "arn:aws:events:${var.region}:${local.account_id}:rule/StepFunctionsGetEventForCodeBuildStartBuildRule"
-        },
-        {
-          Action = [
-            "sns:Publish",
-          ]
-          Effect = "Allow"
-          Resource = [
-            aws_sns_topic.aws_nuke_notify.arn
-          ]
-        },
-        {
-          Action = [
-            "states:DescribeStateMachine",
-            "states:ListExecutions",
-            "states:StartExecution",
-            "states:StopExecution",
-            "states:DescribeExecution",
-          ]
-          Effect = "Allow"
-          Resource = [
-            # aws_sfn_state_machine.nuke_account_cleanser_codebuild_state_machine.arn
-            "arn:aws:states:${var.region}:${local.account_id}:stateMachine:nuke-account-cleanser-codebuild-state-machine",
-          ]
-        },
-      ]
-      Version = "2012-10-17"
-    }
+  policy = templatefile("templates/nukeAccountCleanserCodebuildStateMachinePolicy.json.tftpl", {
+    code_build_arn = aws_codebuild_project.aws_nuke_cleanser.arn,
+    sns_arn = aws_sns_topic.aws_nuke_notify.arn,
+    region = var.region,
+    account_id = local.account_id
+  }
+
   )
 }
 
 resource "aws_iam_role" "nuke_account_cleanser_codebuild_state_machine_role" {
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = "sts:AssumeRole"
-          Effect = "Allow"
-          Principal = {
-            Service = "states.us-west-2.amazonaws.com"
-          }
-        },
-      ]
-      Version = "2012-10-17"
-    }
-  )
+  assume_role_policy = file("files/nukeAccountCleanserCodebuildStateMachineRole.json")
   force_detach_policies = false
   managed_policy_arns   = []
   max_session_duration  = 3600
@@ -258,19 +95,10 @@ resource "aws_iam_role" "nuke_account_cleanser_codebuild_state_machine_role" {
 # aws_iam_role.nuke_auto_account_cleanser:
 # 
 resource "aws_iam_role" "nuke_auto_account_cleanser" {
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = "sts:AssumeRole"
-          Effect = "Allow"
-          Principal = {
-            AWS = aws_iam_role.nuke_code_build_project_role.arn
-          }
-        },
-      ]
-      Version = "2012-10-17"
-    }
+  assume_role_policy = templatefile("templates/nukeAutoAccountCleanser.json.tftpl", {
+    principal_arn = aws_iam_role.nuke_code_build_project_role.arn
+  }
+
   )
   description           = "Nuke Auto account cleanser role for Dev/Sandbox accounts"
   force_detach_policies = false

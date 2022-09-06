@@ -3,58 +3,15 @@ resource "aws_iam_policy" "nuke_account_cleanser" {
   description = "Managed policy for nuke account cleansing"
   name        = "NukeAccountCleanser"
   path        = "/"
-  policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = [
-            "access-analyzer:*",
-            "autoscaling:*",
-            "aws-portal:*",
-            "budgets:*",
-            "cloudtrail:*",
-            "cloudwatch:*",
-            "config:*",
-            "ec2:*",
-            "ec2messages:*",
-            "elasticloadbalancing:*",
-            "eks:*",
-            "elasticache:*",
-            "events:*",
-            "firehose:*",
-            "guardduty:*",
-            "iam:*",
-            "inspector:*",
-            "kinesis:*",
-            "kms:*",
-            "lambda:*",
-            "logs:*",
-            "organizations:*",
-            "pricing:*",
-            "s3:*",
-            "secretsmanager:*",
-            "securityhub:*",
-            "sns:*",
-            "sqs:*",
-            "ssm:*",
-            "ssmmessages:*",
-            "sts:*",
-            "support:*",
-            "tag:*",
-            "trustedadvisor:*",
-            "waf-regional:*",
-            "wafv2:*",
-            "cloudformation:*",
-          ]
-          Effect   = "Allow"
-          Resource = "*"
-          Sid      = "WhitelistedServices"
-        },
-      ]
-      Version = "2012-10-17"
+  policy      = file("files/templates/nuke_account_cleanser_policy.json")
+  tags        = {}
+  tags_all    = {}
+}
+
+resource "aws_iam_policy" "sns_publish_policy" {
+  name = "SNSPublishPolicy"
+  policy = templatefile("templates/aws_iam_policy_sns_publish_policy.json.tftpl", {
+    resource_arn = aws_sns_topic.aws_nuke_notify.arn
     }
   )
-  #   policy_id = "ANPA4ZOGVR7BBCU4GZYQI"
-  tags     = {}
-  tags_all = {}
 }

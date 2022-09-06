@@ -1,0 +1,15 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+        "Action": [
+            "sns:ListTagsForResource",
+            "sns:ListSubscriptionsByTopic",
+            "sns:GetTopicAttributes",
+            "sns:Publish"
+        ],
+        "Effect": "Allow",
+        "Resource": "${resource_arn}"
+    }
+  ]
+}

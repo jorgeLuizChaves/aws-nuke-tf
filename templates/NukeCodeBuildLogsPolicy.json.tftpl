@@ -1,0 +1,19 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogStreams",
+                "logs:FilterLogEvents"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:logs:${region}:${account_id}:log-group:${project_name}",
+                "arn:aws:logs:${region}:${account_id}:log-group:${project_name}:*"
+            ]
+        }
+    ],
+    "Version": "2012-10-17"
+}

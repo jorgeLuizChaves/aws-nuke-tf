@@ -16,5 +16,8 @@ resource "aws_sns_topic_subscription" "users_notified" {
 resource "aws_iam_policy" "sns_policy_rule" {
   name        = "sns_policy"
   description = "SNS policy"
-  policy      = templatefile("files/templates/aws_iam_policy.sns_policy_rule.policy.json.tftpl", { resource_arn = aws_sns_topic.aws_nuke_notify.arn })
+  policy = templatefile("files/templates/aws_iam_policy.sns_policy_rule.policy.json.tftpl",
+    {
+      resource_arn = aws_sns_topic.aws_nuke_notify.arn
+  })
 }

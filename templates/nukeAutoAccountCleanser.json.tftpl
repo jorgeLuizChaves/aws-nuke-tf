@@ -1,0 +1,12 @@
+{
+    "Statement" : [
+      {
+        "Action" : "sts:AssumeRole",
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : "${principal_arn}"
+        }
+      }
+    ],
+    "Version" : "2012-10-17"
+  }

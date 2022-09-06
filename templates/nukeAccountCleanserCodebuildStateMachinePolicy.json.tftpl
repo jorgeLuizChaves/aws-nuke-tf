@@ -1,0 +1,56 @@
+{
+    "Statement" : [
+      {
+        "Action" : [
+          "codebuild:StartBuild",
+          "codebuild:StartBuild",
+          "codebuild:StopBuild",
+          "codebuild:StartBuildBatch",
+          "codebuild:StopBuildBatch",
+          "codebuild:RetryBuild",
+          "codebuild:RetryBuildBatch",
+          "codebuild:BatchGet*",
+          "codebuild:GetResourcePolicy",
+          "codebuild:DescribeTestCases",
+          "codebuild:DescribeCodeCoverages",
+          "codebuild:List*"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "${code_build_arn}"
+        ]
+      },
+      {
+        "Action" : [
+          "events:PutTargets",
+          "events:PutRule",
+          "events:DescribeRule"
+        ],
+        "Effect" : "Allow",
+        "Resource" : "arn:aws:events:${region}:${account_id}:rule/StepFunctionsGetEventForCodeBuildStartBuildRule"
+      },
+      {
+        "Action" : [
+          "sns:Publish"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "${sns_arn}"
+        ]
+      },
+      {
+        "Action" : [
+          "states:DescribeStateMachine",
+          "states:ListExecutions",
+          "states:StartExecution",
+          "states:StopExecution",
+          "states:DescribeExecution"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "arn:aws:states:${region}:${account_id}:stateMachine:nuke-account-cleanser-codebuild-state-machine"
+        ]
+      }
+    ],
+    "Version" : "2012-10-17"
+  }

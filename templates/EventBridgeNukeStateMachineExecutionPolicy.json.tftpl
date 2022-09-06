@@ -1,0 +1,10 @@
+{
+    "Statement": [
+      {
+        "Action": "states:StartExecution",
+        "Effect": "Allow",
+        "Resource" : "arn:aws:states:${region}:${account_id}:stateMachine:nuke-account-cleanser-codebuild-state-machine"
+      }
+    ],
+    "Version": "2012-10-17"
+  }

@@ -35,5 +35,4 @@ variable "nuke_dry_run" {
   type        = string
   description = "dry run"
   default     = "false"
-
 }
