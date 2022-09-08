@@ -82,7 +82,9 @@ resource "aws_iam_role_policy" "nuke_account_cleanser_codebuild_state_machine_po
 }
 
 resource "aws_iam_role" "nuke_account_cleanser_codebuild_state_machine_role" {
-  assume_role_policy = file("files/nukeAccountCleanserCodebuildStateMachineRole.json")
+  assume_role_policy = templatefile("templates/nukeAccountCleanserCodebuildStateMachineRole.json.tftpl", {
+    region = var.region
+  })
   force_detach_policies = false
   managed_policy_arns   = []
   max_session_duration  = 3600

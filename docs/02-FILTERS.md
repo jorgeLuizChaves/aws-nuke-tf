@@ -32,3 +32,6 @@ ACCOUNT:
       value: "admin"
 ```
 
+### Proteger recursos para que não sejam removidos
+
+Para que os recursos não sejam removidos é necessário adicionar a seguinte tag `proteted_from_nukes="true"` nos recursos, desta forma os recursos serão protegidos, e não será possível ser removido.

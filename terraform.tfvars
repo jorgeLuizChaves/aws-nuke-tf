@@ -1,9 +1,9 @@
-project_name  = "accountnuker-abcjorge2022"
+project_name  = "project-name"
 region        = "us-west-2"
 aws_nuke_cron = "0 7 ? * * *"
 emails_notification = [
-  "george.luizchaves@gmail.com",
-  "jorge.oliveira@thoughtworks.com"
+  "mail_to_notified2@mail.com",
+  "mail_to_notified2@email.com"
 ]
 regions_to_nuke  = ["us-west-2"]
 nuke_aws_version = "2.15.0"
